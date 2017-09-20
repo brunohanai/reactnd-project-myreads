@@ -5,7 +5,7 @@ class BookShelf extends React.Component {
     static propTypes = {
         title: PropTypes.string.isRequired,
         books: PropTypes.array.isRequired
-    }
+    };
 
     render() {
         return (
@@ -32,8 +32,7 @@ class BookShelf extends React.Component {
                                         </div>
                                     </div>
                                     <div className="book-title">{book.title}</div>
-                                    {/*TODO: Explode "authors" by comma*/}
-                                    <div className="book-authors">{book.authors}</div>
+                                    <div className="book-authors">{book.authors.join(' / ')}</div>
                                 </div>
                             </li>
                         ))}
