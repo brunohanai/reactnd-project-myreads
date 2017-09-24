@@ -1,12 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import * as BooksAPI from './BooksAPI';
-import BookShelf from './BookShelf';
 
 class SearchBook extends React.Component {
-    state = {
-        books: []
-    };
+    componentDidMount() {
+        this.props.clearSearchResults();
+    }
 
     handleChange = (e) => {
         e.preventDefault();
@@ -14,26 +12,19 @@ class SearchBook extends React.Component {
         const searchTerm = e.target.value;
 
         if (searchTerm === '' || searchTerm.length < 3) {
-            this.setState({books: []});
+            this.props.clearSearchResults();
             return;
         }
 
-        BooksAPI.search(e.target.value).then((books) => {
-            this.setState({ books: books });
-        });
+        this.props.searchBook(searchTerm);
     };
 
     render() {
         return (
-            <div className="search-books">
-                <div className="search-books-bar">
-                    <Link to="/" className="close-search">Close</Link>
-                    <div className="search-books-input-wrapper">
-                        <input onChange={this.handleChange} type="text" name="query" placeholder="Search by title or author"/>
-                    </div>
-                </div>
-                <div className="search-books-results">
-                    <BookShelf title="Search" books={this.state.books}/>
+            <div className="search-books-bar">
+                <Link to="/" className="close-search">Close</Link>
+                <div className="search-books-input-wrapper">
+                    <input onChange={this.handleChange} type="text" name="query" placeholder="Search by title or author"/>
                 </div>
             </div>
         )

@@ -13,7 +13,8 @@ class BooksApp extends React.Component {
             {"id": "read", "caption": "Read"},
             {"id": "none", "caption": "None"},
         ],
-        books: []
+        books: [],
+        searchResultBooks: []
     };
 
     componentDidMount() {
@@ -21,6 +22,38 @@ class BooksApp extends React.Component {
             this.setState({ books: books })
         })
     }
+
+    findBookById = (book_id) => {
+        return this.state.books.find(book => book.id === book_id)
+    };
+
+    updateBookShelf = (book, new_shelf) => {
+        BooksAPI.update(book, new_shelf).then((res) => {
+            BooksAPI.get(book.id).then((updatedBook) => {
+                this.setState(prevState => {
+                    if (this.findBookById(updatedBook.id) === undefined) {
+                        return { books:  [...prevState.books, updatedBook] }
+                    }
+
+                    const books = prevState.books.map(book => (
+                        book.id === updatedBook.id ? updatedBook : book
+                    ));
+
+                    return { books }
+                })
+            })
+        })
+    };
+
+    searchBook = (query) => {
+        BooksAPI.search(query).then((books) => {
+            this.setState({ searchResultBooks: books });
+        });
+    };
+
+    clearSearchResults = () => {
+        this.setState({ searchResultBooks: [] });
+    };
 
     render() {
         return (
@@ -32,11 +65,13 @@ class BooksApp extends React.Component {
                         </div>
                         <div className="list-books-content">
                             <div>
-                                {this.state.shelves.map((shelf) => (
+                                {this.state.shelves.filter((shelf) => shelf.id !== 'none').map((shelf) => (
                                     <BookShelf
                                         key={shelf.id}
                                         title={shelf.caption}
-                                        books={this.state.books.filter((book) => book.shelf === shelf.id)}
+                                        books={this.state.books}
+                                        booksToShow={this.state.books.filter((book) => book.shelf === shelf.id)}
+                                        onBookShelfUpdate={this.updateBookShelf}
                                     />
                                 ))}
                             </div>
@@ -48,7 +83,15 @@ class BooksApp extends React.Component {
                 )}/>
 
                 <Route path="/search" render={() => (
-                    <SearchBook/>
+                    <div className="search-books">
+                        <SearchBook searchBook={this.searchBook} clearSearchResults={this.clearSearchResults} />
+                        <BookShelf
+                            title="Search Results"
+                            books={this.state.books}
+                            booksToShow={this.state.searchResultBooks}
+                            onBookShelfUpdate={this.updateBookShelf}
+                        />
+                    </div>
                 )}/>
             </div>
         )
